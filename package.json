@@ -1,0 +1,16 @@
+{
+  "name": "fifa-live",
+  "version": "1.0.0",
+  "description": "FIFA World Cup 2026 live scores + real-time viewer tracking",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

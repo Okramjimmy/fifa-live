@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFA World Cup 2026 — Live Stream</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --c-bg: #04060e;
+            --c-surface: #090c18;
+            --c-surface2: #0e1220;
+            --c-border: rgba(255, 255, 255, 0.06);
+            --c-border2: rgba(255, 255, 255, 0.12);
+            --c-text: #f0f0f5;
+            --c-muted: rgba(240, 240, 245, 0.45);
+            --c-accent: #e8354a;
+            --c-accent2: #ff6b35;
+            --c-gold: #f5c842;
+            --c-green: #00e676;
+            --c-blue: #3d8bff;
+            --c-glass: rgba(255, 255, 255, 0.04);
+            --c-glass2: rgba(255, 255, 255, 0.08);
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow-x: hidden
+        }
+
+        body {
+            background: var(--c-bg);
+            color: var(--c-text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* ─── BG ─── */
+        .bg-aurora {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden
+        }
+
+        .bg-aurora::before,
+        .bg-aurora::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.14;
+            animation: aurora 20s ease-in-out infinite alternate;
+        }
+
+        .bg-aurora::before {
+            width: 70vw;
+            height: 70vw;
+            top: -15%;
+            left: -15%;
+            background: radial-gradient(circle, #1a5eff 0%, transparent 70%);
+        }
+
+        .bg-aurora::after {
+            width: 55vw;
+            height: 55vw;
+            bottom: -10%;
+            right: -10%;
+            background: radial-gradient(circle, #00c853 0%, transparent 70%);
+            animation-delay: -10s;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 52px 52px;
+        }
+
+        @keyframes aurora {
+            0% {
+                transform: translate(0, 0) scale(1)
+            }
+
+            100% {
+                transform: translate(4%, 5%) scale(1.07)
+            }
+        }
+
+        /* ─── SHELL ─── */
+        .shell {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column
+        }
+
+        /* ─── TOPBAR ─── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--c-border);
+            background: rgba(4, 6, 14, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1a5eff, #00c853);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 0.04em;
+        }
+
+        .logo-text span {
+            background: linear-gradient(90deg, #1a5eff, #00c853);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .topbar-pills {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .badge-live {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 100px;
+            background: rgba(232, 53, 74, 0.15);
+            border: 1px solid rgba(232, 53, 74, 0.35);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #e8354a;
+            animation: pulse-border 2.4s ease-in-out infinite;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #e8354a;
+            animation: blink 1.4s ease-in-out infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.15
+            }
+        }
+
+        @keyframes pulse-border {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(232, 53, 74, 0.25)
+            }
+
+            50% {
+                box-shadow: 0 0 0 4px rgba(232, 53, 74, 0)
+            }
+        }
+
+        .viewer-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 100px;
+            background: var(--c-glass);
+            border: 1px solid var(--c-border2);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--c-muted);
+        }
+
+        .viewer-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--c-blue);
+            animation: blink 2s ease-in-out infinite
+        }
+
+        #viewer-count {
+            color: var(--c-text);
+            font-weight: 600
+        }
+
+        /* ─── MATCH BANNER ─── */
+        .match-banner {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, rgba(26, 94, 255, 0.12), rgba(0, 200, 83, 0.08));
+            border-bottom: 1px solid var(--c-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .match-teams {
+            display: flex;
+            align-items: center;
+            gap: 16px
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .team-flag {
+            font-size: 28px;
+            line-height: 1
+        }
+
+        .team-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 16px
+        }
+
+        .vs-badge {
+            padding: 4px 14px;
+            border-radius: 100px;
+            background: rgba(245, 200, 66, 0.12);
+            border: 1px solid rgba(245, 200, 66, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--c-gold);
+            letter-spacing: 0.06em;
+        }
+
+        .match-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .match-time-badge {
+            padding: 4px 12px;
+            border-radius: 100px;
+            background: rgba(232, 53, 74, 0.12);
+            border: 1px solid rgba(232, 53, 74, 0.3);
+            font-size: 11px;
+            font-weight: 600;
+            color: #e8354a;
+        }
+
+        .match-venue {
+            font-size: 12px;
+            color: var(--c-muted)
+        }
+
+        /* ─── MAIN ─── */
+        .main {
+            display: flex;
+            flex: 1;
+            gap: 0
+        }
+
+        .content-col {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column
+        }
+
+        .chat-col {
+            width: 320px;
+            flex-shrink: 0;
+            border-left: 1px solid var(--c-border);
+            display: flex;
+            flex-direction: column;
+            background: var(--c-surface);
+            position: sticky;
+            top: 61px;
+            height: calc(100vh - 61px);
+            overflow: hidden;
+            align-self: flex-start;
+        }
+
+        /* ─── STREAM SOURCE SWITCHER ─── */
+        .source-switcher {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--c-border);
+            background: var(--c-surface);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .source-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--c-muted);
+            white-space: nowrap;
+            margin-right: 4px;
+        }
+
+        .source-btn {
+            padding: 7px 16px;
+            border-radius: 8px;
+            background: var(--c-glass);
+            border: 1px solid var(--c-border2);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--c-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .source-btn:hover {
+            background: var(--c-glass2);
+            color: var(--c-text);
+            border-color: rgba(255, 255, 255, 0.2)
+        }
+
+        .source-btn.active {
+            background: linear-gradient(135deg, rgba(26, 94, 255, 0.25), rgba(0, 200, 83, 0.15));
+            border-color: rgba(26, 94, 255, 0.5);
+            color: #fff;
+            box-shadow: 0 0 16px rgba(26, 94, 255, 0.25);
+        }
+
+        .source-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.7
+        }
+
+        .source-btn.active .source-dot {
+            background: var(--c-green);
+            opacity: 1;
+            animation: blink 2s ease-in-out infinite
+        }
+
+        .refresh-btn {
+            margin-left: auto;
+            padding: 7px 14px;
+            border-radius: 8px;
+            background: rgba(232, 53, 74, 0.1);
+            border: 1px solid rgba(232, 53, 74, 0.25);
+            font-size: 12px;
+            font-weight: 600;
+            color: #e8354a;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(232, 53, 74, 0.2)
+        }
+
+        /* ─── VIDEO PLAYER ─── */
+        .player-wrap {
+            position: relative;
+            background: #000;
+            aspect-ratio: 16/9;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #hls-video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            background: #000
+        }
+
+        .player-wrap::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: linear-gradient(to top, rgba(4, 6, 14, 0.85) 0%, transparent 28%),
+                linear-gradient(to bottom, rgba(4, 6, 14, 0.6) 0%, transparent 18%);
+        }
+
+        .player-wrap::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+        }
+
+        .player-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            transition: opacity 0.3s;
+        }
+
+        .floating-live {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(232, 53, 74, 0.92);
+            backdrop-filter: blur(8px);
+            padding: 5px 13px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(232, 53, 74, 0.5);
+            animation: float-badge 3.5s ease-in-out infinite;
+        }
+
+        @keyframes float-badge {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-2px)
+            }
+        }
+
+        .stream-hud {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .hud-pill {
+            padding: 4px 10px;
+            border-radius: 100px;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 10px 24px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .player-wrap:not(:hover) .score-overlay {
+            opacity: 0
+        }
+
+        .player-wrap:hover .score-overlay {
+            opacity: 1
+        }
+
+        .score-team {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center
+        }
+
+        .score-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--c-gold)
+        }
+
+        .score-sep {
+            font-size: 16px;
+            color: var(--c-muted)
+        }
+
+        .player-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 5;
+            padding: 14px 18px 12px;
+            transition: opacity 0.4s;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1a5eff, #00c853);
+            border-radius: 2px;
+            animation: progress-live 90s linear infinite;
+        }
+
+        @keyframes progress-live {
+            0% {
+                width: 0%
+            }
+
+            100% {
+                width: 100%
+            }
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .ctrl-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.12)
+        }
+
+        .ctrl-btn svg {
+            width: 19px;
+            height: 19px;
+            fill: currentColor
+        }
+
+        .ctrl-spacer {
+            flex: 1
+        }
+
+        .quality-badge {
+            padding: 2px 7px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: rgba(255, 255, 255, 0.65);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .vol-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 65px;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Controls hide/show */
+        .player-wrap:not(:hover) .player-bottom,
+        .player-wrap:not(:hover) .player-top {
+            opacity: 0
+        }
+
+        .player-wrap.paused .player-bottom,
+        .player-wrap.paused .player-top {
+            opacity: 1
+        }
+
+        .player-wrap:hover .player-bottom,
+        .player-wrap:hover .player-top {
+            opacity: 1
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(4, 6, 14, 0.94);
+            gap: 18px;
+            transition: opacity 0.5s;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid rgba(26, 94, 255, 0.15);
+            border-top-color: #1a5eff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .loading-text {
+            font-size: 13px;
+            color: var(--c-muted);
+            letter-spacing: 0.05em
+        }
+
+        .loading-ball {
+            font-size: 32px;
+            animation: bounce 0.8s ease-in-out infinite alternate
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0)
+            }
+
+            100% {
+                transform: translateY(-10px)
+            }
+        }
+
+        /* ─── STATS ─── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--c-border);
+            background: var(--c-surface);
+        }
+
+        .stat-card {
+            padding: 14px 16px;
+            border-right: 1px solid var(--c-border);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .stat-card:last-child {
+            border-right: none
+        }
+
+        .stat-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--c-muted)
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--c-text)
+        }
+
+        .stat-value.accent {
+            color: #e8354a
+        }
+
+        .stat-value.blue {
+            color: var(--c-blue)
+        }
+
+        .stat-value.gold {
+            color: var(--c-gold)
+        }
+
+        .stat-value.green {
+            color: var(--c-green)
+        }
+
+        .stat-delta {
+            font-size: 10px;
+            color: var(--c-muted);
+            margin-top: 1px
+        }
+
+        /* ─── SCORE CARD ─── */
+        .score-card {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, rgba(26, 94, 255, 0.06), rgba(0, 200, 83, 0.04));
+            border-bottom: 1px solid var(--c-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .sc-team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 80px
+        }
+
+        .sc-flag {
+            font-size: 32px
+        }
+
+        .sc-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center
+        }
+
+        .sc-score {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sc-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--c-text);
+            line-height: 1;
+        }
+
+        .sc-divider {
+            font-size: 22px;
+            color: var(--c-muted);
+            font-weight: 300
+        }
+
+        .sc-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--c-gold);
+            text-align: center;
+        }
+
+        .sc-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--c-accent);
+            font-weight: 600;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        /* ─── CHAT ─── */
+        .chat-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--c-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.04em
+        }
+
+        .chat-online {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            color: var(--c-muted)
+        }
+
+        .chat-online-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--c-green)
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            scroll-behavior: smooth
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 3px
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--c-border2);
+            border-radius: 2px
+        }
+
+        .chat-msg {
+            padding: 5px 14px;
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            transition: background 0.15s;
+        }
+
+        .chat-msg:hover {
+            background: rgba(255, 255, 255, 0.025)
+        }
+
+        .avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .msg-body {
+            flex: 1;
+            min-width: 0
+        }
+
+        .msg-head {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 2px
+        }
+
+        .msg-name {
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .msg-time {
+            font-size: 9px;
+            color: var(--c-muted);
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .msg-text {
+            font-size: 12px;
+            color: rgba(240, 240, 245, 0.78);
+            line-height: 1.5;
+            word-break: break-word
+        }
+
+        .badge-mod {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: rgba(61, 139, 255, 0.2);
+            color: var(--c-blue);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase
+        }
+
+        .badge-vip {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: rgba(245, 200, 66, 0.15);
+            color: var(--c-gold);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase
+        }
+
+        .chat-input-row {
+            padding: 10px 12px;
+            border-top: 1px solid var(--c-border);
+            display: flex;
+            gap: 7px;
+            background: var(--c-surface);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--c-glass2);
+            border: 1px solid var(--c-border2);
+            border-radius: 9px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--c-text);
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input::placeholder {
+            color: var(--c-muted)
+        }
+
+        .chat-input:focus {
+            border-color: rgba(26, 94, 255, 0.5)
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #1a5eff, #0a3fbf);
+            border: none;
+            border-radius: 9px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .send-btn:hover {
+            opacity: 0.88
+        }
+
+        .send-btn:active {
+            transform: scale(0.94)
+        }
+
+        .send-btn svg {
+            width: 15px;
+            height: 15px;
+            fill: white
+        }
+
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(16px);
+            background: rgba(20, 24, 40, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--c-border2);
+            border-radius: 10px;
+            padding: 9px 18px;
+            font-size: 12px;
+            color: var(--c-text);
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0)
+        }
+
+        /* ─── EMOTE ─── */
+        @keyframes float-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-110px) scale(0.7)
+            }
+        }
+
+        .emote-burst {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+            font-size: 20px;
+            animation: float-up 2.2s ease-out forwards
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media(max-width:960px) {
+            .chat-col {
+                display: none
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media(max-width:640px) {
+            .topbar {
+                padding: 10px 14px
+            }
+
+            .match-banner {
+                padding: 12px 16px
+            }
+
+            .source-switcher {
+                padding: 10px 14px
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .stat-card {
+                padding: 10px 12px
+            }
+
+            .score-card {
+                padding: 12px 16px;
+                gap: 16px
+            }
+
+            .sc-num {
+                font-size: 30px
+            }
+        }
+
+        /* ─── LIVE SCORES PANEL ─── */
+        .live-scores-section { border-top: 1px solid var(--c-border); }
+
+        .live-scores-header {
+            padding: 12px 20px;
+            background: var(--c-surface);
+            border-bottom: 1px solid var(--c-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .lsh-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.03em;
+        }
+
+        .lsh-meta { display: flex; align-items: center; gap: 10px; }
+
+        .lsh-status {
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            color: var(--c-green);
+            font-weight: 600;
+        }
+
+        .lsh-updated {
+            font-size: 10px;
+            color: var(--c-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .live-scores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            background: var(--c-surface);
+        }
+
+        .match-card {
+            padding: 13px 16px;
+            border-right: 1px solid var(--c-border);
+            border-bottom: 1px solid var(--c-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .match-card:hover { background: var(--c-glass); }
+
+        .match-card.is-live::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--c-accent);
+        }
+
+        .mc-teams {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .mc-team-row { display: flex; align-items: center; gap: 7px; }
+
+        .mc-flag { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .mc-name {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .mc-score-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 44px;
+        }
+
+        .mc-score-pair {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mc-score-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--c-text);
+            width: 20px;
+            text-align: center;
+        }
+
+        .mc-score-sep {
+            font-size: 10px;
+            color: var(--c-muted);
+            line-height: 1;
+        }
+
+        .mc-time {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .mc-time.live { color: var(--c-accent); animation: blink 2s ease-in-out infinite; }
+        .mc-time.ft   { color: var(--c-muted); }
+        .mc-time.pre  { color: var(--c-blue); }
+
+        .no-matches {
+            padding: 32px 20px;
+            text-align: center;
+            color: var(--c-muted);
+            font-size: 13px;
+            grid-column: 1 / -1;
+        }
+
+        .api-notice {
+            padding: 10px 20px;
+            background: rgba(245, 200, 66, 0.06);
+            border-top: 1px solid rgba(245, 200, 66, 0.15);
+            font-size: 11px;
+            color: var(--c-muted);
+            text-align: center;
+        }
+
+        /* ─── NAME MODAL ─── */
+        .name-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            background: rgba(4, 6, 14, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .name-modal-overlay.visible { display: flex; }
+
+        .name-modal {
+            background: var(--c-surface2);
+            border: 1px solid var(--c-border2);
+            border-radius: 16px;
+            padding: 32px 28px;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .name-modal-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .name-modal-sub {
+            font-size: 13px;
+            color: var(--c-muted);
+            line-height: 1.5;
+        }
+
+        .name-modal-input {
+            background: var(--c-glass2);
+            border: 1px solid var(--c-border2);
+            border-radius: 9px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: var(--c-text);
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .name-modal-input:focus { border-color: rgba(26, 94, 255, 0.6); }
+
+        .name-modal-btn {
+            background: linear-gradient(135deg, #1a5eff, #0a3fbf);
+            border: none;
+            border-radius: 9px;
+            padding: 11px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .name-modal-btn:hover { opacity: 0.88; }
+
+        /* ─── AD SHIELD ─── */
+        /* pointer-events:none — clicks pass through to player controls.
+           Ad popup blocking is handled by the iframe sandbox (no allow-popups). */
+        .ad-shield {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        /* ─── SCORE OVERLAY (removed) ─── */
+        .score-overlay { display: none !important; }
+
+        /* ─── WATERMARK COVER ─── */
+        /* Covers the source stream's branded watermark in the top-right corner. */
+        .watermark-cover {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 180px;
+            height: 52px;
+            background: #000;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* ─── FULLSCREEN CHAT TICKER ─── */
+        .fs-ticker {
+            display: none;
+            position: absolute;
+            bottom: 54px;
+            left: 0;
+            right: 0;
+            z-index: 6;
+            pointer-events: none;
+            overflow: hidden;
+            height: 42px;
+        }
+
+        :fullscreen .fs-ticker,
+        :-webkit-full-screen .fs-ticker { display: block; }
+
+        .fs-ticker-inner {
+            display: inline-flex;
+            align-items: center;
+            height: 100%;
+            white-space: nowrap;
+            transform: translateX(110vw);
+        }
+
+        .fs-ticker-inner.running {
+            animation: fs-scroll var(--scroll-dur, 10s) linear forwards;
+        }
+
+        @keyframes fs-scroll {
+            from { transform: translateX(110vw); }
+            to   { transform: translateX(-110%); }
+        }
+
+        .fs-ticker-bubble {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.62);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 22px;
+            padding: 7px 16px;
+            font-size: 13px;
+            font-family: 'Space Grotesk', sans-serif;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .fs-ticker-name {
+            font-weight: 700;
+            color: var(--c-accent);
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-aurora"></div>
+    <div class="bg-grid"></div>
+
+    <div class="shell">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="logo">
+                <div class="logo-badge">⚽</div>
+                <div class="logo-text"><span>FIFA</span> World Cup 2026</div>
+            </div>
+            <div class="topbar-pills">
+                <div class="badge-live">
+                    <div class="live-dot"></div>Live
+                </div>
+                <div class="viewer-pill">
+                    <div class="viewer-dot"></div>
+                    <span id="viewer-count">284,571</span> watching
+                </div>
+            </div>
+        </header>
+
+        <!-- MATCH BANNER -->
+        <div class="match-banner">
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-flag" id="feat-home-flag">🇧🇷</div>
+                    <div class="team-name" id="feat-home-name">Brazil</div>
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="team">
+                    <div class="team-flag" id="feat-away-flag">🇦🇷</div>
+                    <div class="team-name" id="feat-away-name">Argentina</div>
+                </div>
+            </div>
+            <div class="match-meta">
+                <div class="match-time-badge" id="feat-status">⚽ Group Stage — Match Day 3</div>
+                <div class="match-venue" id="feat-venue">📍 MetLife Stadium, New York · USA/CAN/MEX 2026</div>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="content-col">
+
+                <!-- SOURCE SWITCHER (like reference site) -->
+                <div class="source-switcher">
+                    <span class="source-label">Stream Source:</span>
+                    <button class="source-btn" onclick="switchSource(this,'hls')" id="btn-hls">
+                        <span class="source-dot"></span> HD Stream 1
+                    </button>
+                    <button class="source-btn" onclick="switchSource(this,'english1')" id="btn-e1">
+                        <span class="source-dot"></span> English 2
+                    </button>
+                    <button class="source-btn" onclick="switchSource(this,'english2')" id="btn-e2">
+                        <span class="source-dot"></span> English 3
+                    </button>
+                    <button class="source-btn active" onclick="switchSource(this,'backup')" id="btn-bk">
+                        <span class="source-dot"></span> Backup HD
+                    </button>
+                    <button class="refresh-btn" onclick="refreshStream()">↺ Refresh</button>
+                </div>
+
+                <!-- VIDEO PLAYER -->
+                <div class="player-wrap" id="player-wrap">
+
+                    <!-- HLS native player (shown for HLS source) -->
+                    <video id="hls-video" playsinline style="display:block"></video>
+
+                    <!-- Iframe player (shown for iframe sources) -->
+                    <iframe id="stream-iframe"
+                        style="display:none;width:100%;height:100%;border:none;position:absolute;inset:0;"
+                        allow="autoplay;encrypted-media;fullscreen;picture-in-picture" allowfullscreen
+                        sandbox="allow-forms allow-same-origin allow-scripts allow-presentation"
+                        src="about:blank">
+                    </iframe>
+
+                    <!-- Ad click-absorber: sits between iframe and player controls.
+                         Blocks all direct iframe clicks so ad scripts never fire. -->
+                    <div class="ad-shield" id="ad-shield"></div>
+
+                    <!-- Watermark cover: hides source branding in top-right -->
+                    <div class="watermark-cover"></div>
+
+                    <!-- Loading -->
+                    <div class="loading-overlay" id="loading-overlay">
+                        <div class="loading-ball">⚽</div>
+                        <div class="spinner"></div>
+                        <div class="loading-text">Connecting to stream…</div>
+                    </div>
+
+                    <!-- Top HUD -->
+                    <div class="player-top">
+                        <div class="floating-live">
+                            <div class="live-dot"></div> Live
+                        </div>
+                        <!-- stream-hud removed: was appearing as unwanted top-right overlay -->
+                        <span id="match-clock" style="display:none"></span>
+                        <span id="quality-badge" style="display:none"></span>
+                    </div>
+
+                    <!-- Score overlay on hover -->
+                    <div class="score-overlay">
+                        <div class="score-team"><span id="ov-home-flag" style="font-size:20px">🇧🇷</span><span
+                                id="ov-home-abbr" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700">BRA</span></div>
+                        <div id="sc-left"
+                            style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--c-gold)">
+                            1</div>
+                        <div style="font-size:18px;color:var(--c-muted)">—</div>
+                        <div id="sc-right"
+                            style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--c-gold)">
+                            1</div>
+                        <div class="score-team"><span id="ov-away-flag" style="font-size:20px">🇦🇷</span><span
+                                id="ov-away-abbr" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700">ARG</span></div>
+                    </div>
+
+                    <!-- Fullscreen chat ticker -->
+                    <div class="fs-ticker" id="fs-ticker">
+                        <div class="fs-ticker-inner" id="fs-ticker-inner"></div>
+                    </div>
+
+                    <!-- Bottom Controls -->
+                    <div class="player-bottom">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="controls-row">
+                            <button class="ctrl-btn" id="play-btn" aria-label="Play/Pause">
+                                <svg id="play-icon" viewBox="0 0 24 24">
+                                    <path d="M6 4l15 8-15 8V4z" />
+                                </svg>
+                            </button>
+                            <button class="ctrl-btn" id="mute-btn" aria-label="Mute">
+                                <svg id="vol-icon" viewBox="0 0 24 24">
+                                    <path id="vol-path"
+                                        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                                </svg>
+                            </button>
+                            <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="80"
+                                aria-label="Volume">
+                            <div class="ctrl-spacer"></div>
+                            <div class="quality-badge" id="quality-badge2">AUTO</div>
+                            <button class="ctrl-btn" id="fs-btn" aria-label="Fullscreen">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCOREBOARD -->
+                <div class="score-card">
+                    <div class="sc-team">
+                        <div class="sc-flag" id="sc-home-flag">🇧🇷</div>
+                        <div class="sc-name" id="sc-home-name">Brazil</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                        <div class="sc-label">FIFA World Cup 2026</div>
+                        <div class="sc-score">
+                            <div class="sc-num" id="score-home">1</div>
+                            <div class="sc-divider">:</div>
+                            <div class="sc-num" id="score-away">1</div>
+                        </div>
+                        <div class="sc-time" id="live-time">78'</div>
+                    </div>
+                    <div class="sc-team">
+                        <div class="sc-flag" id="sc-away-flag">🇦🇷</div>
+                        <div class="sc-name" id="sc-away-name">Argentina</div>
+                    </div>
+                </div>
+
+                <!-- STATS ROW -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Peak Viewers</div>
+                        <div class="stat-value accent" id="peak-viewers">312,440</div>
+                        <div class="stat-delta">↑ 22% vs last match</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Stream Uptime</div>
+                        <div class="stat-value blue" id="stream-uptime">01:18:07</div>
+                        <div class="stat-delta">Started 8:00 PM IST</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Bitrate</div>
+                        <div class="stat-value gold" id="bitrate-val">5.1 Mbps</div>
+                        <div class="stat-delta">Buffer: 0.0s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Stream Health</div>
+                        <div class="stat-value green">Excellent</div>
+                        <div class="stat-delta">Latency: 1.4s</div>
+                    </div>
+                </div>
+
+                <!-- LIVE SCORES -->
+                <div class="live-scores-section">
+                    <div class="live-scores-header">
+                        <div class="lsh-title">⚽ FIFA Live Scores</div>
+                        <div class="lsh-meta">
+                            <div class="lsh-status" id="lsh-status">Connecting…</div>
+                            <div class="lsh-updated" id="lsh-updated"></div>
+                        </div>
+                    </div>
+                    <div class="live-scores-grid" id="live-scores-grid">
+                        <div class="no-matches">Fetching live match data…</div>
+                    </div>
+                    <div class="api-notice">Live data via ESPN public API · Updates every 30s · Click any match to feature it</div>
+                </div>
+
+            </div><!-- /content-col -->
+
+            <!-- CHAT -->
+            <div class="chat-col">
+                <div class="chat-header">
+                    <div class="chat-title">⚽ Match Chat</div>
+                    <div class="chat-online">
+                        <div class="chat-online-dot"></div><span id="chat-online">284,571 online</span>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-row">
+                    <input class="chat-input" id="chat-input" type="text" placeholder="Cheer for your team…"
+                        maxlength="200">
+                    <button class="send-btn" id="send-btn" aria-label="Send">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+        </div><!-- /main -->
+    </div><!-- /shell -->
+
+    <div class="toast" id="toast"></div>
+
+    <!-- NAME MODAL -->
+    <div class="name-modal-overlay" id="name-modal-overlay">
+        <div class="name-modal">
+            <div class="name-modal-title">⚽ Join the Chat</div>
+            <p class="name-modal-sub">Choose a display name to join the live match chat.</p>
+            <input class="name-modal-input" id="name-modal-input" type="text" placeholder="Your name…" maxlength="20" autocomplete="off">
+            <button class="name-modal-btn" id="name-modal-btn">Join Chat</button>
+        </div>
+    </div>
+
+    <script>
+        // ─── STREAM SOURCES ───────────────────────────────────
+        const SOURCES = {
+            hls: { type: 'hls', url: 'https://storage.googleapis.com/hynvessrworov1/mux_video_ts1/index-1.m3u8' },
+            english1: { type: 'iframe', url: 'https://soccerball.st/rampages/search1/' },
+            english2: { type: 'iframe', url: 'https://sayanchannelcdn02.pages.dev/football/english' },
+            backup: { type: 'iframe', url: 'https://soccerball.st/rampages/search1/' },
+        };
+
+        let currentSource = 'backup';
+        let hls, isPlaying = false, isMuted = false;
+
+        const video = document.getElementById('hls-video');
+        const iframe = document.getElementById('stream-iframe');
+        const overlay = document.getElementById('loading-overlay');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const muteBtn = document.getElementById('mute-btn');
+        const volIcon = document.getElementById('vol-icon');
+        const volSlider = document.getElementById('vol-slider');
+        const fsBtn = document.getElementById('fs-btn');
+        const playerWrap = document.getElementById('player-wrap');
+
+        const PLAY_SVG = '<path d="M6 4l15 8-15 8V4z"/>';
+        const PAUSE_SVG = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+        const VOL_PATH = 'M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z';
+        const MUTE_PATH = 'M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z';
+        const volPath = document.getElementById('vol-path');
+
+        function showLoading() { overlay.classList.remove('hidden') }
+        function hideLoading() { overlay.classList.add('hidden') }
+
+        // ─── HLS INIT ───
+        function initHls(url) {
+            video.style.display = 'block';
+            iframe.style.display = 'none';
+            showLoading();
+            if (hls) { hls.destroy(); hls = null; }
+
+            // Unblock controls if stream doesn't respond within 10s
+            const streamTimeout = setTimeout(() => hideLoading(), 10000);
+
+            if (Hls.isSupported()) {
+                hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play().catch(() => { video.muted = true; isMuted = true; volPath.setAttribute('d', MUTE_PATH); video.play() });
+                });
+                hls.on(Hls.Events.LEVEL_LOADED, () => {
+                    clearTimeout(streamTimeout);
+                    hideLoading(); isPlaying = true; playIcon.innerHTML = PAUSE_SVG;
+                });
+                hls.on(Hls.Events.LEVEL_SWITCHED, (e, d) => {
+                    const l = hls.levels[d.level];
+                    if (l) {
+                        const q = l.height ? l.height + 'p' : 'AUTO';
+                        document.getElementById('quality-badge').textContent = q;
+                        document.getElementById('quality-badge2').textContent = q;
+                    }
+                });
+                hls.on(Hls.Events.FRAG_LOADED, () => {
+                    if (hls.bandwidthEstimate) {
+                        document.getElementById('bitrate-val').textContent = (hls.bandwidthEstimate / 1e6).toFixed(1) + ' Mbps';
+                    }
+                });
+                hls.on(Hls.Events.ERROR, (e, d) => {
+                    if (d.fatal) {
+                        clearTimeout(streamTimeout);
+                        hideLoading();
+                        setTimeout(() => { if (hls) hls.startLoad() }, 3000);
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.addEventListener('loadedmetadata', () => {
+                    clearTimeout(streamTimeout);
+                    video.play(); hideLoading(); isPlaying = true; playIcon.innerHTML = PAUSE_SVG;
+                });
+            }
+        }
+
+        // ─── IFRAME INIT ───
+        function initIframe(url) {
+            video.style.display = 'none';
+            iframe.style.display = 'block';
+            hideLoading();
+            document.getElementById('quality-badge').textContent = 'AUTO';
+            document.getElementById('quality-badge2').textContent = 'AUTO';
+            iframe.src = url; // direct load — autoplay handled by allow="autoplay" attribute
+            isPlaying = true;
+            playIcon.innerHTML = PAUSE_SVG;
+        }
+
+        // ─── SWITCH SOURCE ───
+        function switchSource(btn, key) {
+            if (key === currentSource) return;
+            currentSource = key;
+            document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const src = SOURCES[key];
+            if (src.type === 'hls') initHls(src.url);
+            else initIframe(src.url);
+            showToast('Switched to ' + btn.textContent.trim());
+        }
+
+        function refreshStream() {
+            const src = SOURCES[currentSource];
+            if (src.type === 'hls') { if (hls) { hls.stopLoad(); hls.startLoad(); } }
+            else { const u = iframe.src; iframe.src = 'about:blank'; setTimeout(() => iframe.src = u, 400); }
+            showToast('Stream refreshed ↺');
+            spawnEmotes();
+        }
+
+        // Start with Backup HD (iframe)
+        initIframe(SOURCES.backup.url);
+
+        // ─── VIDEO CONTROLS ───
+        playBtn.addEventListener('click', () => {
+            if (currentSource !== 'hls') return;
+            if (video.paused) { video.play(); isPlaying = true; playIcon.innerHTML = PAUSE_SVG; playerWrap.classList.remove('paused') }
+            else { video.pause(); isPlaying = false; playIcon.innerHTML = PLAY_SVG; playerWrap.classList.add('paused') }
+        });
+        video.addEventListener('play', () => { isPlaying = true; playIcon.innerHTML = PAUSE_SVG; playerWrap.classList.remove('paused') });
+        video.addEventListener('pause', () => { isPlaying = false; playIcon.innerHTML = PLAY_SVG; playerWrap.classList.add('paused') });
+
+        muteBtn.addEventListener('click', () => {
+            if (currentSource !== 'hls') return;
+            if (isMuted) {
+                video.muted = false; isMuted = false;
+                volPath.setAttribute('d', VOL_PATH);
+                volSlider.value = Math.round(video.volume * 100) || 80;
+            } else {
+                video.muted = true; isMuted = true;
+                volPath.setAttribute('d', MUTE_PATH);
+            }
+        });
+        volSlider.addEventListener('input', () => {
+            if (currentSource !== 'hls') return;
+            video.volume = volSlider.value / 100;
+            if (+volSlider.value === 0) {
+                isMuted = true; video.muted = true; volPath.setAttribute('d', MUTE_PATH);
+            } else {
+                isMuted = false; video.muted = false; volPath.setAttribute('d', VOL_PATH);
+            }
+        });
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) playerWrap.requestFullscreen && playerWrap.requestFullscreen();
+            else document.exitFullscreen && document.exitFullscreen();
+        });
+
+        // ─── USERNAME MODAL ───────────────────────────────────────────
+        let chatUserName = localStorage.getItem('fifaChatName') || null;
+        const nameOverlay = document.getElementById('name-modal-overlay');
+        const nameInput   = document.getElementById('name-modal-input');
+        const nameBtn     = document.getElementById('name-modal-btn');
+
+        function openNameModal() { nameOverlay.classList.add('visible'); nameInput.focus(); }
+        function closeNameModal() { nameOverlay.classList.remove('visible'); }
+
+        if (!chatUserName) openNameModal();
+
+        function confirmName() {
+            const val = nameInput.value.trim();
+            if (!val) { nameInput.focus(); return; }
+            chatUserName = val;
+            localStorage.setItem('fifaChatName', val);
+            closeNameModal();
+        }
+        nameBtn.addEventListener('click', confirmName);
+        nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') confirmName(); });
+
+        // ─── SOCKET.IO ────────────────────────────────────────────────
+        const socket = io();
+        let featuredMatchId = null;
+
+        // Real viewer count from server
+        socket.on('viewers', ({ current, peak }) => {
+            document.getElementById('viewer-count').textContent = current.toLocaleString();
+            document.getElementById('chat-online').textContent = current.toLocaleString() + ' online';
+            document.getElementById('peak-viewers').textContent = peak.toLocaleString();
+        });
+
+        // Live scores from ESPN API (via server)
+        socket.on('scores', ({ matches, fetchedAt, liveCount }) => {
+            renderLiveScores(matches, fetchedAt, liveCount);
+
+            // Auto-feature first live match, or first match overall
+            const live = matches.filter(m => m.state === 'in');
+            const target = live[0] || matches[0];
+            if (target) {
+                if (target.id !== featuredMatchId) {
+                    featuredMatchId = target.id;
+                    setFeaturedMatch(target);
+                } else {
+                    updateFeaturedScore(target);
+                }
+            }
+        });
+
+        // Chat history on connect
+        socket.on('chat:history', (messages) => {
+            messages.forEach(m => {
+                addMsg(remoteUser(m.name), m.text, true);
+            });
+            chatEl.scrollTop = chatEl.scrollHeight;
+        });
+
+        // Incoming messages from other viewers (server uses broadcast, not emit, so no echo)
+        socket.on('chat:remote', ({ name, text }) => {
+            addMsg(remoteUser(name), text);
+            pushTicker(name, text);
+        });
+
+        function remoteUser(name) {
+            const COLORS = ['#3d8bff', '#f5c842', '#00e676', '#ff6b35', '#a855f7', '#06b6d4', '#ec4899'];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xffff;
+            return { name, color: COLORS[hash % COLORS.length], av: '#0e1220', role: null };
+        }
+
+        // ─── FEATURED MATCH ───────────────────────────────────────────
+        function setFeaturedMatch(m) {
+            document.getElementById('feat-home-flag').textContent = m.homeFlag;
+            document.getElementById('feat-home-name').textContent = m.homeTeam;
+            document.getElementById('feat-away-flag').textContent = m.awayFlag;
+            document.getElementById('feat-away-name').textContent = m.awayTeam;
+            document.getElementById('feat-status').textContent = m.statusText || 'FIFA World Cup 2026';
+            const loc = m.venue ? '📍 ' + m.venue + (m.venueCity ? ', ' + m.venueCity : '') : '';
+            document.getElementById('feat-venue').textContent = loc;
+
+            document.getElementById('ov-home-flag').textContent = m.homeFlag;
+            document.getElementById('ov-home-abbr').textContent = m.homeAbbr || m.homeTeam.slice(0, 3).toUpperCase();
+            document.getElementById('ov-away-flag').textContent = m.awayFlag;
+            document.getElementById('ov-away-abbr').textContent = m.awayAbbr || m.awayTeam.slice(0, 3).toUpperCase();
+
+            document.getElementById('sc-home-flag').textContent = m.homeFlag;
+            document.getElementById('sc-home-name').textContent = m.homeTeam;
+            document.getElementById('sc-away-flag').textContent = m.awayFlag;
+            document.getElementById('sc-away-name').textContent = m.awayTeam;
+
+            updateFeaturedScore(m);
+        }
+
+        function updateFeaturedScore(m) {
+            const hs = m.homeScore !== null ? m.homeScore : '–';
+            const as = m.awayScore !== null ? m.awayScore : '–';
+            document.getElementById('score-home').textContent = hs;
+            document.getElementById('score-away').textContent = as;
+            document.getElementById('sc-left').textContent = hs;
+            document.getElementById('sc-right').textContent = as;
+
+            if (m.state === 'in') {
+                const t = m.clock ? m.clock + "'" : 'LIVE';
+                document.getElementById('live-time').textContent = t;
+                document.getElementById('match-clock').textContent = '⏱ ' + t;
+            } else if (m.state === 'post') {
+                document.getElementById('live-time').textContent = 'FT';
+                document.getElementById('match-clock').textContent = 'FINAL';
+            } else {
+                document.getElementById('live-time').textContent = '--';
+                document.getElementById('match-clock').textContent = '⏱ PRE';
+            }
+        }
+
+        // ─── LIVE SCORES GRID ─────────────────────────────────────────
+        function renderLiveScores(matches, fetchedAt, liveCount) {
+            const grid = document.getElementById('live-scores-grid');
+            const statusEl = document.getElementById('lsh-status');
+            const updatedEl = document.getElementById('lsh-updated');
+
+            if (liveCount > 0) {
+                statusEl.textContent = liveCount + ' LIVE';
+                statusEl.style.background = 'rgba(232, 53, 74, 0.12)';
+                statusEl.style.borderColor = 'rgba(232, 53, 74, 0.3)';
+                statusEl.style.color = 'var(--c-accent)';
+            } else {
+                statusEl.textContent = matches.length ? matches.length + ' matches' : 'No matches';
+                statusEl.style.background = '';
+                statusEl.style.borderColor = '';
+                statusEl.style.color = '';
+            }
+
+            if (fetchedAt) {
+                updatedEl.textContent = 'Updated ' + new Date(fetchedAt).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            if (!matches.length) {
+                grid.innerHTML = '<div class="no-matches">No FIFA matches found right now. The API is live — check back when a match is scheduled.</div>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            matches.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'match-card' + (m.state === 'in' ? ' is-live' : '');
+
+                let timeHTML;
+                if (m.state === 'in') {
+                    timeHTML = `<span class="mc-time live">● ${m.clock || 'LIVE'}'</span>`;
+                } else if (m.state === 'post') {
+                    timeHTML = `<span class="mc-time ft">FULL TIME</span>`;
+                } else {
+                    const d = m.date ? new Date(m.date).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                    timeHTML = `<span class="mc-time pre">${d}</span>`;
+                }
+
+                const hScore = m.homeScore !== null ? m.homeScore : '–';
+                const aScore = m.awayScore !== null ? m.awayScore : '–';
+
+                card.innerHTML = `
+                    <div class="mc-teams">
+                        <div class="mc-team-row">
+                            <span class="mc-flag">${m.homeFlag}</span>
+                            <span class="mc-name">${m.homeTeam}</span>
+                        </div>
+                        <div class="mc-team-row">
+                            <span class="mc-flag">${m.awayFlag}</span>
+                            <span class="mc-name">${m.awayTeam}</span>
+                        </div>
+                        ${m.competition ? `<div style="font-size:9px;color:var(--c-muted);margin-top:3px;letter-spacing:.04em">${m.competition}</div>` : ''}
+                    </div>
+                    <div class="mc-score-col">
+                        <div class="mc-score-pair">
+                            <span class="mc-score-num">${hScore}</span>
+                            <span class="mc-score-sep">–</span>
+                            <span class="mc-score-num">${aScore}</span>
+                        </div>
+                        ${timeHTML}
+                    </div>`;
+
+                card.addEventListener('click', () => {
+                    featuredMatchId = m.id;
+                    setFeaturedMatch(m);
+                    showToast(`Now featuring: ${m.homeTeam} vs ${m.awayTeam}`);
+                    spawnEmotes();
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ─── FULLSCREEN CHAT TICKER ───────────────────────────────────
+        const fsTickerInner = document.getElementById('fs-ticker-inner');
+        const tickerQueue = [];
+        let tickerBusy = false;
+
+        function pushTicker(name, text) {
+            tickerQueue.push({ name, text });
+            if (!tickerBusy) drainTicker();
+        }
+
+        function drainTicker() {
+            if (!tickerQueue.length) { tickerBusy = false; return; }
+            tickerBusy = true;
+            const { name, text } = tickerQueue.shift();
+            fsTickerInner.innerHTML =
+                `<div class="fs-ticker-bubble"><span class="fs-ticker-name">${esc(name)}:</span> ${esc(text)}</div>`;
+            // Scroll speed ~120px/s, min 6s, max 18s
+            const dur = Math.min(18, Math.max(6, (text.length * 11 + 300) / 100));
+            fsTickerInner.style.setProperty('--scroll-dur', dur + 's');
+            fsTickerInner.classList.remove('running');
+            void fsTickerInner.offsetWidth; // force reflow to restart animation
+            fsTickerInner.classList.add('running');
+            fsTickerInner.addEventListener('animationend', drainTicker, { once: true });
+        }
+
+        // ─── UPTIME CLOCK ───
+        let uptimeSecs = 4687;
+        setInterval(() => {
+            uptimeSecs++;
+            const h = Math.floor(uptimeSecs / 3600), m = Math.floor((uptimeSecs % 3600) / 60), s = uptimeSecs % 60;
+            document.getElementById('stream-uptime').textContent =
+                String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }, 1000);
+
+        // Sync score overlay with scoreboard on DOM ready
+        document.getElementById('sc-left').textContent = document.getElementById('score-home').textContent;
+        document.getElementById('sc-right').textContent = document.getElementById('score-away').textContent;
+
+        // ─── CHAT ───
+        const chatEl = document.getElementById('chat-messages');
+        let chatPaused = false;
+
+        function addMsg(user, text, instant = false) {
+            const empty = document.getElementById('chat-empty');
+            if (empty) empty.remove();
+            const div = document.createElement('div');
+            div.className = 'chat-msg';
+            const init = user.name.slice(0, 2).toUpperCase();
+            const badge = user.role === 'mod' ? '<span class="badge-mod">MOD</span>' : user.role === 'vip' ? '<span class="badge-vip">VIP</span>' : '';
+            div.innerHTML = `<div class="avatar" style="background:${user.av};color:${user.color}">${init}</div>
+    <div class="msg-body">
+      <div class="msg-head"><span class="msg-name" style="color:${user.color}">${user.name}</span>${badge}
+        <span class="msg-time">${new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: false })}</span></div>
+      <div class="msg-text">${esc(text)}</div>
+    </div>`;
+            if (!instant) { div.style.opacity = '0'; }
+            chatEl.appendChild(div);
+            if (!instant) requestAnimationFrame(() => { div.style.transition = 'opacity 0.3s'; div.style.opacity = '1' });
+            if (!chatPaused) chatEl.scrollTop = chatEl.scrollHeight;
+        }
+        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+
+        // Show placeholder until first real message arrives
+        const emptyChat = document.createElement('div');
+        emptyChat.id = 'chat-empty';
+        emptyChat.style.cssText = 'padding:32px 16px;text-align:center;color:var(--c-muted);font-size:12px;line-height:1.8';
+        emptyChat.textContent = 'No messages yet.\nSay something to start the chat!';
+        chatEl.appendChild(emptyChat);
+
+        chatEl.addEventListener('mouseenter', () => chatPaused = true);
+        chatEl.addEventListener('mouseleave', () => { chatPaused = false; chatEl.scrollTop = chatEl.scrollHeight });
+
+        function sendUserMsg() {
+            if (!chatUserName) { openNameModal(); return; }
+            const inp = document.getElementById('chat-input');
+            const val = inp.value.trim(); if (!val) return;
+            inp.value = '';
+            addMsg({ name: chatUserName + ' (You)', color: '#e8354a', av: '#3d0a10', role: null }, val);
+            socket.emit('chat', { name: chatUserName, text: val });
+            pushTicker(chatUserName, val); // also show own messages in fullscreen ticker
+            spawnEmotes();
+        }
+        document.getElementById('send-btn').addEventListener('click', sendUserMsg);
+        document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendUserMsg() });
+
+        // ─── EMOTES ───
+        function spawnEmotes() {
+            const e = ['⚽', '🔥', '🏆', '⚡', '🎯', '🥅', '💥', '🙌'];
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'emote-burst';
+                    el.textContent = e[Math.floor(Math.random() * e.length)];
+                    el.style.left = (Math.random() * 80 + 10) + 'vw';
+                    el.style.bottom = '100px';
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 2300);
+                }, i * 130);
+            }
+        }
+
+        // ─── TOAST ───
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2800);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', e => {
+            if (e.target === document.getElementById('chat-input')) return;
+            if (e.code === 'Space') { e.preventDefault(); if (currentSource === 'hls') playBtn.click() }
+            if (e.code === 'KeyM') muteBtn.click();
+            if (e.code === 'KeyF') fsBtn.click();
+            if (e.code === 'Digit1') document.getElementById('btn-hls').click();
+            if (e.code === 'Digit2') document.getElementById('btn-e1').click();
+            if (e.code === 'Digit3') document.getElementById('btn-e2').click();
+            if (e.code === 'Digit4') document.getElementById('btn-bk').click();
+        });
+
+        document.querySelector('.logo').addEventListener('click', () => { spawnEmotes(); showToast('FIFA World Cup 2026 🏆 — Alpha Coder') });
+    </script>
+</body>
+
+</html>
