@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FIFA World Cup 2026 — Live Stream</title>
-    <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
@@ -173,6 +172,22 @@
             flex-wrap: wrap
         }
 
+        .dev-credit {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .dev-credit a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+        }
+
+        .dev-credit a:hover {
+            color: #1a5eff;
+        }
+
         .badge-live {
             display: flex;
             align-items: center;
@@ -219,32 +234,6 @@
             50% {
                 box-shadow: 0 0 0 4px rgba(232, 53, 74, 0)
             }
-        }
-
-        .viewer-pill {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 12px;
-            border-radius: 100px;
-            background: var(--c-glass);
-            border: 1px solid var(--c-border2);
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--c-muted);
-        }
-
-        .viewer-dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--c-blue);
-            animation: blink 2s ease-in-out infinite
-        }
-
-        #viewer-count {
-            color: var(--c-text);
-            font-weight: 600
         }
 
         /* ─── MATCH BANNER ─── */
@@ -328,20 +317,6 @@
             min-width: 0;
             display: flex;
             flex-direction: column
-        }
-
-        .chat-col {
-            width: 320px;
-            flex-shrink: 0;
-            border-left: 1px solid var(--c-border);
-            display: flex;
-            flex-direction: column;
-            background: var(--c-surface);
-            position: sticky;
-            top: 61px;
-            height: calc(100vh - 61px);
-            overflow: hidden;
-            align-self: flex-start;
         }
 
         /* ─── STREAM SOURCE SWITCHER ─── */
@@ -869,191 +844,6 @@
             animation: blink 2s ease-in-out infinite;
         }
 
-        /* ─── CHAT ─── */
-        .chat-header {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--c-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-title {
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 13px;
-            letter-spacing: 0.04em
-        }
-
-        .chat-online {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 10px;
-            color: var(--c-muted)
-        }
-
-        .chat-online-dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--c-green)
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 0;
-            scroll-behavior: smooth
-        }
-
-        .chat-messages::-webkit-scrollbar {
-            width: 3px
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: var(--c-border2);
-            border-radius: 2px
-        }
-
-        .chat-msg {
-            padding: 5px 14px;
-            display: flex;
-            gap: 9px;
-            align-items: flex-start;
-            transition: background 0.15s;
-        }
-
-        .chat-msg:hover {
-            background: rgba(255, 255, 255, 0.025)
-        }
-
-        .avatar {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            margin-top: 2px;
-        }
-
-        .msg-body {
-            flex: 1;
-            min-width: 0
-        }
-
-        .msg-head {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            margin-bottom: 2px
-        }
-
-        .msg-name {
-            font-size: 11px;
-            font-weight: 700
-        }
-
-        .msg-time {
-            font-size: 9px;
-            color: var(--c-muted);
-            font-family: 'JetBrains Mono', monospace
-        }
-
-        .msg-text {
-            font-size: 12px;
-            color: rgba(240, 240, 245, 0.78);
-            line-height: 1.5;
-            word-break: break-word
-        }
-
-        .badge-mod {
-            font-size: 9px;
-            padding: 1px 5px;
-            border-radius: 3px;
-            background: rgba(61, 139, 255, 0.2);
-            color: var(--c-blue);
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase
-        }
-
-        .badge-vip {
-            font-size: 9px;
-            padding: 1px 5px;
-            border-radius: 3px;
-            background: rgba(245, 200, 66, 0.15);
-            color: var(--c-gold);
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase
-        }
-
-        .chat-input-row {
-            padding: 10px 12px;
-            border-top: 1px solid var(--c-border);
-            display: flex;
-            gap: 7px;
-            background: var(--c-surface);
-        }
-
-        .chat-input {
-            flex: 1;
-            background: var(--c-glass2);
-            border: 1px solid var(--c-border2);
-            border-radius: 9px;
-            padding: 8px 12px;
-            font-size: 12px;
-            color: var(--c-text);
-            font-family: 'Space Grotesk', sans-serif;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .chat-input::placeholder {
-            color: var(--c-muted)
-        }
-
-        .chat-input:focus {
-            border-color: rgba(26, 94, 255, 0.5)
-        }
-
-        .send-btn {
-            background: linear-gradient(135deg, #1a5eff, #0a3fbf);
-            border: none;
-            border-radius: 9px;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: opacity 0.2s, transform 0.1s;
-        }
-
-        .send-btn:hover {
-            opacity: 0.88
-        }
-
-        .send-btn:active {
-            transform: scale(0.94)
-        }
-
-        .send-btn svg {
-            width: 15px;
-            height: 15px;
-            fill: white
-        }
-
         /* ─── TOAST ─── */
         .toast {
             position: fixed;
@@ -1102,10 +892,6 @@
 
         /* ─── RESPONSIVE ─── */
         @media(max-width:960px) {
-            .chat-col {
-                display: none
-            }
-
             .stats-row {
                 grid-template-columns: repeat(2, 1fr)
             }
@@ -1293,73 +1079,6 @@
         }
 
         /* ─── NAME MODAL ─── */
-        .name-modal-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 900;
-            background: rgba(4, 6, 14, 0.82);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .name-modal-overlay.visible { display: flex; }
-
-        .name-modal {
-            background: var(--c-surface2);
-            border: 1px solid var(--c-border2);
-            border-radius: 16px;
-            padding: 32px 28px;
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .name-modal-title {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: 18px;
-        }
-
-        .name-modal-sub {
-            font-size: 13px;
-            color: var(--c-muted);
-            line-height: 1.5;
-        }
-
-        .name-modal-input {
-            background: var(--c-glass2);
-            border: 1px solid var(--c-border2);
-            border-radius: 9px;
-            padding: 10px 14px;
-            font-size: 14px;
-            color: var(--c-text);
-            font-family: 'Space Grotesk', sans-serif;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .name-modal-input:focus { border-color: rgba(26, 94, 255, 0.6); }
-
-        .name-modal-btn {
-            background: linear-gradient(135deg, #1a5eff, #0a3fbf);
-            border: none;
-            border-radius: 9px;
-            padding: 11px;
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 14px;
-            color: #fff;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .name-modal-btn:hover { opacity: 0.88; }
-
         /* ─── AD SHIELD ─── */
         /* pointer-events:none — clicks pass through to player controls.
            Ad popup blocking is handled by the iframe sandbox (no allow-popups). */
@@ -1387,59 +1106,6 @@
             pointer-events: none;
         }
 
-        /* ─── FULLSCREEN CHAT TICKER ─── */
-        .fs-ticker {
-            display: none;
-            position: absolute;
-            bottom: 54px;
-            left: 0;
-            right: 0;
-            z-index: 6;
-            pointer-events: none;
-            overflow: hidden;
-            height: 42px;
-        }
-
-        :fullscreen .fs-ticker,
-        :-webkit-full-screen .fs-ticker { display: block; }
-
-        .fs-ticker-inner {
-            display: inline-flex;
-            align-items: center;
-            height: 100%;
-            white-space: nowrap;
-            transform: translateX(110vw);
-        }
-
-        .fs-ticker-inner.running {
-            animation: fs-scroll var(--scroll-dur, 10s) linear forwards;
-        }
-
-        @keyframes fs-scroll {
-            from { transform: translateX(110vw); }
-            to   { transform: translateX(-110%); }
-        }
-
-        .fs-ticker-bubble {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.62);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 22px;
-            padding: 7px 16px;
-            font-size: 13px;
-            font-family: 'Space Grotesk', sans-serif;
-            color: rgba(255,255,255,0.9);
-        }
-
-        .fs-ticker-name {
-            font-weight: 700;
-            color: var(--c-accent);
-            flex-shrink: 0;
-        }
     </style>
 </head>
 
@@ -1459,10 +1125,7 @@
                 <div class="badge-live">
                     <div class="live-dot"></div>Live
                 </div>
-                <div class="viewer-pill">
-                    <div class="viewer-dot"></div>
-                    <span id="viewer-count">284,571</span> watching
-                </div>
+                <div class="dev-credit">dev by Okram</div>
             </div>
         </header>
 
@@ -1559,11 +1222,6 @@
                                 id="ov-away-abbr" style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700">ARG</span></div>
                     </div>
 
-                    <!-- Fullscreen chat ticker -->
-                    <div class="fs-ticker" id="fs-ticker">
-                        <div class="fs-ticker-inner" id="fs-ticker-inner"></div>
-                    </div>
-
                     <!-- Bottom Controls -->
                     <div class="player-bottom">
                         <div class="progress-bar">
@@ -1619,24 +1277,24 @@
                 <!-- STATS ROW -->
                 <div class="stats-row">
                     <div class="stat-card">
-                        <div class="stat-label">Peak Viewers</div>
-                        <div class="stat-value accent" id="peak-viewers">312,440</div>
-                        <div class="stat-delta">↑ 22% vs last match</div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-label">Stream Uptime</div>
-                        <div class="stat-value blue" id="stream-uptime">01:18:07</div>
-                        <div class="stat-delta">Started 8:00 PM IST</div>
+                        <div class="stat-value blue" id="stream-uptime">00:00:00</div>
+                        <div class="stat-delta" id="stream-started">Page loaded</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Bitrate</div>
-                        <div class="stat-value gold" id="bitrate-val">5.1 Mbps</div>
-                        <div class="stat-delta">Buffer: 0.0s</div>
+                        <div class="stat-value gold" id="bitrate-val">—</div>
+                        <div class="stat-delta" id="buffer-val">HLS only</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Stream Health</div>
-                        <div class="stat-value green">Excellent</div>
-                        <div class="stat-delta">Latency: 1.4s</div>
+                        <div class="stat-value green" id="health-val">—</div>
+                        <div class="stat-delta" id="health-delta">Waiting…</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Live Matches</div>
+                        <div class="stat-value accent" id="live-match-count">—</div>
+                        <div class="stat-delta">FIFA World Cup 2026</div>
                     </div>
                 </div>
 
@@ -1657,40 +1315,10 @@
 
             </div><!-- /content-col -->
 
-            <!-- CHAT -->
-            <div class="chat-col">
-                <div class="chat-header">
-                    <div class="chat-title">⚽ Match Chat</div>
-                    <div class="chat-online">
-                        <div class="chat-online-dot"></div><span id="chat-online">284,571 online</span>
-                    </div>
-                </div>
-                <div class="chat-messages" id="chat-messages"></div>
-                <div class="chat-input-row">
-                    <input class="chat-input" id="chat-input" type="text" placeholder="Cheer for your team…"
-                        maxlength="200">
-                    <button class="send-btn" id="send-btn" aria-label="Send">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
         </div><!-- /main -->
     </div><!-- /shell -->
 
     <div class="toast" id="toast"></div>
-
-    <!-- NAME MODAL -->
-    <div class="name-modal-overlay" id="name-modal-overlay">
-        <div class="name-modal">
-            <div class="name-modal-title">⚽ Join the Chat</div>
-            <p class="name-modal-sub">Choose a display name to join the live match chat.</p>
-            <input class="name-modal-input" id="name-modal-input" type="text" placeholder="Your name…" maxlength="20" autocomplete="off">
-            <button class="name-modal-btn" id="name-modal-btn">Join Chat</button>
-        </div>
-    </div>
 
     <script>
         // ─── STREAM SOURCES ───────────────────────────────────
@@ -1753,15 +1381,24 @@
                         document.getElementById('quality-badge2').textContent = q;
                     }
                 });
-                hls.on(Hls.Events.FRAG_LOADED, () => {
+                hls.on(Hls.Events.FRAG_LOADED, (e, data) => {
                     if (hls.bandwidthEstimate) {
-                        document.getElementById('bitrate-val').textContent = (hls.bandwidthEstimate / 1e6).toFixed(1) + ' Mbps';
+                        const mbps = hls.bandwidthEstimate / 1e6;
+                        document.getElementById('bitrate-val').textContent = mbps.toFixed(1) + ' Mbps';
+                        const buf = video.buffered.length ? (video.buffered.end(video.buffered.length-1) - video.currentTime).toFixed(1) : '0.0';
+                        document.getElementById('buffer-val').textContent = 'Buffer: ' + buf + 's';
+                        const health = mbps > 3 ? 'Excellent' : mbps > 1 ? 'Good' : 'Poor';
+                        document.getElementById('health-val').textContent = health;
+                        document.getElementById('health-val').className = 'stat-value ' + (mbps > 3 ? 'green' : mbps > 1 ? 'gold' : 'accent');
+                        document.getElementById('health-delta').textContent = data.frag ? Math.round(data.stats?.loading?.end - data.stats?.loading?.start) + 'ms load' : 'HLS';
                     }
                 });
                 hls.on(Hls.Events.ERROR, (e, d) => {
                     if (d.fatal) {
                         clearTimeout(streamTimeout);
                         hideLoading();
+                        document.getElementById('health-val').textContent = 'Error';
+                        document.getElementById('health-val').className = 'stat-value accent';
                         setTimeout(() => { if (hls) hls.startLoad() }, 3000);
                     }
                 });
@@ -1843,75 +1480,85 @@
             else document.exitFullscreen && document.exitFullscreen();
         });
 
-        // ─── USERNAME MODAL ───────────────────────────────────────────
-        let chatUserName = localStorage.getItem('fifaChatName') || null;
-        const nameOverlay = document.getElementById('name-modal-overlay');
-        const nameInput   = document.getElementById('name-modal-input');
-        const nameBtn     = document.getElementById('name-modal-btn');
-
-        function openNameModal() { nameOverlay.classList.add('visible'); nameInput.focus(); }
-        function closeNameModal() { nameOverlay.classList.remove('visible'); }
-
-        if (!chatUserName) openNameModal();
-
-        function confirmName() {
-            const val = nameInput.value.trim();
-            if (!val) { nameInput.focus(); return; }
-            chatUserName = val;
-            localStorage.setItem('fifaChatName', val);
-            closeNameModal();
-        }
-        nameBtn.addEventListener('click', confirmName);
-        nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') confirmName(); });
-
-        // ─── SOCKET.IO ────────────────────────────────────────────────
-        const socket = io();
+        // ─── ESPN SCORES ──────────────────────────────────────────────
         let featuredMatchId = null;
 
-        // Real viewer count from server
-        socket.on('viewers', ({ current, peak }) => {
-            document.getElementById('viewer-count').textContent = current.toLocaleString();
-            document.getElementById('chat-online').textContent = current.toLocaleString() + ' online';
-            document.getElementById('peak-viewers').textContent = peak.toLocaleString();
-        });
+        // ─── FLAGS ────────────────────────────────────────────────────
+        const FLAGS = {
+            AUS:'🇦🇺',ARG:'🇦🇷',ALB:'🇦🇱',ALG:'🇩🇿',ARM:'🇦🇲',AUT:'🇦🇹',AZE:'🇦🇿',
+            BEL:'🇧🇪',BIH:'🇧🇦',BOL:'🇧🇴',BRA:'🇧🇷',CAN:'🇨🇦',CHI:'🇨🇱',CHN:'🇨🇳',
+            CIV:'🇨🇮',CMR:'🇨🇲',COL:'🇨🇴',CRC:'🇨🇷',CRO:'🇭🇷',CZE:'🇨🇿',DEN:'🇩🇰',
+            ECU:'🇪🇨',EGY:'🇪🇬',ENG:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',ESP:'🇪🇸',EST:'🇪🇪',FIN:'🇫🇮',FRA:'🇫🇷',
+            GEO:'🇬🇪',GER:'🇩🇪',GHA:'🇬🇭',GRE:'🇬🇷',GTM:'🇬🇹',HON:'🇭🇳',HUN:'🇭🇺',
+            IDN:'🇮🇩',IRL:'🇮🇪',IRN:'🇮🇷',IRQ:'🇮🇶',ISL:'🇮🇸',ISR:'🇮🇱',ITA:'🇮🇹',
+            JAM:'🇯🇲',JPN:'🇯🇵',JOR:'🇯🇴',KAZ:'🇰🇿',KGZ:'🇰🇬',KOR:'🇰🇷',KOS:'🇽🇰',
+            KWT:'🇰🇼',LAT:'🇱🇻',LTU:'🇱🇹',LUX:'🇱🇺',MAR:'🇲🇦',MEX:'🇲🇽',MKD:'🇲🇰',
+            MNE:'🇲🇪',NED:'🇳🇱',NGA:'🇳🇬',NIR:'🇬🇧',NOR:'🇳🇴',NZL:'🇳🇿',OMN:'🇴🇲',
+            PAN:'🇵🇦',PAR:'🇵🇾',PER:'🇵🇪',PHI:'🇵🇭',POL:'🇵🇱',POR:'🇵🇹',QAT:'🇶🇦',
+            ROM:'🇷🇴',SAU:'🇸🇦',SCO:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',SEN:'🇸🇳',SLV:'🇸🇻',SRB:'🇷🇸',SUI:'🇨🇭',
+            SVK:'🇸🇰',SVN:'🇸🇮',SWE:'🇸🇪',THA:'🇹🇭',TJK:'🇹🇯',TRI:'🇹🇹',TUN:'🇹🇳',
+            TUR:'🇹🇷',UAE:'🇦🇪',UKR:'🇺🇦',URU:'🇺🇾',USA:'🇺🇸',UZB:'🇺🇿',VEN:'🇻🇪',
+            VNM:'🇻🇳',WAL:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+        };
+        function flag(abbr) { return FLAGS[(abbr||'').toUpperCase()]||'🏳'; }
 
-        // Live scores from ESPN API (via server)
-        socket.on('scores', ({ matches, fetchedAt, liveCount }) => {
-            renderLiveScores(matches, fetchedAt, liveCount);
-
-            // Auto-feature first live match, or first match overall
-            const live = matches.filter(m => m.state === 'in');
-            const target = live[0] || matches[0];
-            if (target) {
-                if (target.id !== featuredMatchId) {
-                    featuredMatchId = target.id;
-                    setFeaturedMatch(target);
-                } else {
-                    updateFeaturedScore(target);
-                }
-            }
-        });
-
-        // Chat history on connect
-        socket.on('chat:history', (messages) => {
-            messages.forEach(m => {
-                addMsg(remoteUser(m.name), m.text, true);
-            });
-            chatEl.scrollTop = chatEl.scrollHeight;
-        });
-
-        // Incoming messages from other viewers (server uses broadcast, not emit, so no echo)
-        socket.on('chat:remote', ({ name, text }) => {
-            addMsg(remoteUser(name), text);
-            pushTicker(name, text);
-        });
-
-        function remoteUser(name) {
-            const COLORS = ['#3d8bff', '#f5c842', '#00e676', '#ff6b35', '#a855f7', '#06b6d4', '#ec4899'];
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xffff;
-            return { name, color: COLORS[hash % COLORS.length], av: '#0e1220', role: null };
+        function parseEvent(event) {
+            const comp = event.competitions?.[0];
+            if (!comp) return null;
+            const home = comp.competitors?.find(c => c.homeAway === 'home');
+            const away = comp.competitors?.find(c => c.homeAway === 'away');
+            const status = comp.status || {};
+            const state = status.type?.state || 'pre';
+            return {
+                id: String(event.id),
+                homeTeam: home?.team?.displayName || home?.team?.name || 'TBD',
+                homeAbbr: (home?.team?.abbreviation||'').toUpperCase(),
+                homeFlag: flag(home?.team?.abbreviation),
+                homeScore: state !== 'pre' ? parseInt(home?.score??0) : null,
+                awayTeam: away?.team?.displayName || away?.team?.name || 'TBD',
+                awayAbbr: (away?.team?.abbreviation||'').toUpperCase(),
+                awayFlag: flag(away?.team?.abbreviation),
+                awayScore: state !== 'pre' ? parseInt(away?.score??0) : null,
+                clock: status.displayClock||'',
+                period: status.period||0,
+                state,
+                statusText: status.type?.shortDetail||status.type?.description||'',
+                venue: comp.venue?.fullName||'',
+                venueCity: comp.venue?.address?.city||'',
+                date: event.date||null,
+            };
         }
+
+        // ─── ESPN SCORES (direct browser fetch) ──────────────────────
+        async function fetchScores() {
+            try {
+                const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard');
+                if (!res.ok) return;
+                const data = await res.json();
+                const seen = new Set();
+                const ORDER = { in:0, pre:1, post:2 };
+                const matches = (data.events||[])
+                    .map(e => parseEvent(e)).filter(Boolean)
+                    .map(m => ({ ...m, competition:'FIFA World Cup 2026' }))
+                    .filter(m => !seen.has(m.id) && seen.add(m.id))
+                    .sort((a,b) => (ORDER[a.state]??3)-(ORDER[b.state]??3));
+
+                const live = matches.filter(m => m.state === 'in');
+                renderLiveScores(matches, new Date().toISOString(), live.length);
+
+                const target = live[0] || matches[0];
+                if (target) {
+                    if (target.id !== featuredMatchId) {
+                        featuredMatchId = target.id;
+                        setFeaturedMatch(target);
+                    } else {
+                        updateFeaturedScore(target);
+                    }
+                }
+            } catch(err) { console.error('[scores]', err.message); }
+        }
+        fetchScores();
+        setInterval(fetchScores, 5000);
 
         // ─── FEATURED MATCH ───────────────────────────────────────────
         function setFeaturedMatch(m) {
@@ -1962,6 +1609,8 @@
             const grid = document.getElementById('live-scores-grid');
             const statusEl = document.getElementById('lsh-status');
             const updatedEl = document.getElementById('lsh-updated');
+
+            document.getElementById('live-match-count').textContent = liveCount > 0 ? liveCount + ' live' : matches.length || '0';
 
             if (liveCount > 0) {
                 statusEl.textContent = liveCount + ' LIVE';
@@ -2034,36 +1683,13 @@
             });
         }
 
-        // ─── FULLSCREEN CHAT TICKER ───────────────────────────────────
-        const fsTickerInner = document.getElementById('fs-ticker-inner');
-        const tickerQueue = [];
-        let tickerBusy = false;
-
-        function pushTicker(name, text) {
-            tickerQueue.push({ name, text });
-            if (!tickerBusy) drainTicker();
-        }
-
-        function drainTicker() {
-            if (!tickerQueue.length) { tickerBusy = false; return; }
-            tickerBusy = true;
-            const { name, text } = tickerQueue.shift();
-            fsTickerInner.innerHTML =
-                `<div class="fs-ticker-bubble"><span class="fs-ticker-name">${esc(name)}:</span> ${esc(text)}</div>`;
-            // Scroll speed ~120px/s, min 6s, max 18s
-            const dur = Math.min(18, Math.max(6, (text.length * 11 + 300) / 100));
-            fsTickerInner.style.setProperty('--scroll-dur', dur + 's');
-            fsTickerInner.classList.remove('running');
-            void fsTickerInner.offsetWidth; // force reflow to restart animation
-            fsTickerInner.classList.add('running');
-            fsTickerInner.addEventListener('animationend', drainTicker, { once: true });
-        }
-
-        // ─── UPTIME CLOCK ───
-        let uptimeSecs = 4687;
+        // ─── UPTIME CLOCK (real, from page load) ───
+        const pageLoadTime = Date.now();
+        document.getElementById('stream-started').textContent =
+            'Since ' + new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
         setInterval(() => {
-            uptimeSecs++;
-            const h = Math.floor(uptimeSecs / 3600), m = Math.floor((uptimeSecs % 3600) / 60), s = uptimeSecs % 60;
+            const secs = Math.floor((Date.now() - pageLoadTime) / 1000);
+            const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
             document.getElementById('stream-uptime').textContent =
                 String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
         }, 1000);
@@ -2071,53 +1697,6 @@
         // Sync score overlay with scoreboard on DOM ready
         document.getElementById('sc-left').textContent = document.getElementById('score-home').textContent;
         document.getElementById('sc-right').textContent = document.getElementById('score-away').textContent;
-
-        // ─── CHAT ───
-        const chatEl = document.getElementById('chat-messages');
-        let chatPaused = false;
-
-        function addMsg(user, text, instant = false) {
-            const empty = document.getElementById('chat-empty');
-            if (empty) empty.remove();
-            const div = document.createElement('div');
-            div.className = 'chat-msg';
-            const init = user.name.slice(0, 2).toUpperCase();
-            const badge = user.role === 'mod' ? '<span class="badge-mod">MOD</span>' : user.role === 'vip' ? '<span class="badge-vip">VIP</span>' : '';
-            div.innerHTML = `<div class="avatar" style="background:${user.av};color:${user.color}">${init}</div>
-    <div class="msg-body">
-      <div class="msg-head"><span class="msg-name" style="color:${user.color}">${user.name}</span>${badge}
-        <span class="msg-time">${new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: false })}</span></div>
-      <div class="msg-text">${esc(text)}</div>
-    </div>`;
-            if (!instant) { div.style.opacity = '0'; }
-            chatEl.appendChild(div);
-            if (!instant) requestAnimationFrame(() => { div.style.transition = 'opacity 0.3s'; div.style.opacity = '1' });
-            if (!chatPaused) chatEl.scrollTop = chatEl.scrollHeight;
-        }
-        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
-
-        // Show placeholder until first real message arrives
-        const emptyChat = document.createElement('div');
-        emptyChat.id = 'chat-empty';
-        emptyChat.style.cssText = 'padding:32px 16px;text-align:center;color:var(--c-muted);font-size:12px;line-height:1.8';
-        emptyChat.textContent = 'No messages yet.\nSay something to start the chat!';
-        chatEl.appendChild(emptyChat);
-
-        chatEl.addEventListener('mouseenter', () => chatPaused = true);
-        chatEl.addEventListener('mouseleave', () => { chatPaused = false; chatEl.scrollTop = chatEl.scrollHeight });
-
-        function sendUserMsg() {
-            if (!chatUserName) { openNameModal(); return; }
-            const inp = document.getElementById('chat-input');
-            const val = inp.value.trim(); if (!val) return;
-            inp.value = '';
-            addMsg({ name: chatUserName + ' (You)', color: '#e8354a', av: '#3d0a10', role: null }, val);
-            socket.emit('chat', { name: chatUserName, text: val });
-            pushTicker(chatUserName, val); // also show own messages in fullscreen ticker
-            spawnEmotes();
-        }
-        document.getElementById('send-btn').addEventListener('click', sendUserMsg);
-        document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendUserMsg() });
 
         // ─── EMOTES ───
         function spawnEmotes() {
@@ -2144,7 +1723,6 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', e => {
-            if (e.target === document.getElementById('chat-input')) return;
             if (e.code === 'Space') { e.preventDefault(); if (currentSource === 'hls') playBtn.click() }
             if (e.code === 'KeyM') muteBtn.click();
             if (e.code === 'KeyF') fsBtn.click();
@@ -2154,7 +1732,7 @@
             if (e.code === 'Digit4') document.getElementById('btn-bk').click();
         });
 
-        document.querySelector('.logo').addEventListener('click', () => { spawnEmotes(); showToast('FIFA World Cup 2026 🏆 — Alpha Coder') });
+        document.querySelector('.logo').addEventListener('click', () => { spawnEmotes(); showToast('FIFA World Cup 2026 🏆 — Developed by Okram') });
     </script>
 </body>
 
