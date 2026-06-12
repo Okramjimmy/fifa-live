@@ -650,19 +650,23 @@
         }
 
         /* Controls hide/show */
-        .player-wrap:not(:hover) .player-bottom,
-        .player-wrap:not(:hover) .player-top {
+        .player-wrap:not(:hover):not(.paused):not(.controls-visible) .player-bottom,
+        .player-wrap:not(:hover):not(.paused):not(.controls-visible) .player-top {
             opacity: 0
         }
 
         .player-wrap.paused .player-bottom,
-        .player-wrap.paused .player-top {
+        .player-wrap.paused .player-top,
+        .player-wrap:hover .player-bottom,
+        .player-wrap:hover .player-top,
+        .player-wrap.controls-visible .player-bottom,
+        .player-wrap.controls-visible .player-top {
             opacity: 1
         }
 
-        .player-wrap:hover .player-bottom,
-        .player-wrap:hover .player-top {
-            opacity: 1
+        /* Larger touch targets on mobile */
+        @media (pointer: coarse) {
+            .ctrl-btn { padding: 10px; }
         }
 
         /* Loading */
@@ -1476,9 +1480,33 @@
             }
         });
         fsBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) playerWrap.requestFullscreen && playerWrap.requestFullscreen();
-            else document.exitFullscreen && document.exitFullscreen();
+            const inFS = document.fullscreenElement || document.webkitFullscreenElement;
+            if (!inFS) {
+                if (playerWrap.requestFullscreen) playerWrap.requestFullscreen();
+                else if (playerWrap.webkitRequestFullscreen) playerWrap.webkitRequestFullscreen();
+                else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); // iOS Safari
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            }
         });
+
+        // Mobile: tap player to toggle controls visibility
+        let _controlsTimer;
+        function showControlsBriefly() {
+            playerWrap.classList.add('controls-visible');
+            clearTimeout(_controlsTimer);
+            _controlsTimer = setTimeout(() => playerWrap.classList.remove('controls-visible'), 3000);
+        }
+        playerWrap.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.ctrl-btn') || e.target.closest('.vol-slider') || e.target.closest('.source-switcher')) return;
+            if (playerWrap.classList.contains('controls-visible')) {
+                playerWrap.classList.remove('controls-visible');
+                clearTimeout(_controlsTimer);
+            } else {
+                showControlsBriefly();
+            }
+        }, { passive: true });
 
         // ─── ESPN SCORES ──────────────────────────────────────────────
         let featuredMatchId = null;
